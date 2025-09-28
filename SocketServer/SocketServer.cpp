@@ -8,6 +8,7 @@ using namespace std;
 
 struct sockaddr_in srv;
 fd_set fr,fw, fe;
+int nMaxFd;
 int main()
 {
     int nRet = 0;
@@ -57,22 +58,37 @@ int main()
     else {
         cout << endl << "Started listening to local port";
     }
+	nMaxFd = nSocket;
+	struct timeval tv;
+    tv.tv_sec = 1;
+    tv.tv_usec = 0 ;
 
-    int n = 100;
-    for (int nIndex = 0; nIndex < 65; nIndex++) {
-        FD_SET(n, &fr);
-        n++;
-    }
-
-    cout << endl << fr.fd_count << endl;
+    FD_ZERO(&fr);
+    FD_ZERO(&fw);
+    FD_ZERO(&fe);
 
 
-    for (int nIndex = 0; nIndex < 65; nIndex++)
-    {
-        cout << fr.fd_array[nIndex];
-    }
-    //keep waiting for new requests and proceed as per the request
+	FD_SET(nSocket, &fr);
+	FD_SET(nSocket, &fe);
     
+    cout<<endl<<"Before Select Call : "<<fr.fd_count;
+    //keep waiting for new requests and proceed as per the request
+    nRet = select(nMaxFd + 1, &fr, &fw, &fe, &tv);
+    
+    if (nRet > 0 ) {
+        // When someone connects or communicates with a message over 
+        // Dedicated connnection
+
+    }
+    else if (nRet==0) {
+        // No connection or any communication request made or you can say that
+        // None of the socket descriptors are ready
+        cout << endl << "Nothing on Port : " << PORT; 
+    }
+    else {
+        // It failed and Your have to handle the error
+    }
+    cout << endl << "After Select call : " << fr.fd_count;
 }
 
 
